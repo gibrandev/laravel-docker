@@ -1,0 +1,56 @@
+version: '3'
+services:
+  web-laravel:
+    image: nginx
+    container_name: nginx-laravel
+    ports:
+      - 80:80
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d  
+      - ./www:/var/www
+    networks:
+      local-network:
+
+  mysql-5.7:
+    image: mysql
+    container_name: mysql-laravel
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=laravel
+      - MYSQL_ROOT_PASSWORD=laravel
+      - MYSQL_USER=laravel
+      - MYSQL_PASSWORD=laravel
+    volumes:
+      - "./docker/mysql:/var/lib/mysql"
+    networks:
+      - local-network
+
+  redis:
+    image: redis
+    container_name: redis-laravel
+    ports:
+      - "6379:6379"
+    entrypoint: redis-server --appendonly yes
+    networks:
+      - local-network
+
+  php:
+    build:
+      context: .
+      dockerfile: php
+    image: local-php8.1-fpm
+    container_name: php8.1-laravel
+    working_dir: /var/www
+    volumes:
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./www:/var/www
+      - ./www/storage/logs:/var/www/storage/logs
+    ports:
+      - "9090:9000"
+    networks:
+      - local-network
+
+networks:
+  local-network:
+    driver: bridge
