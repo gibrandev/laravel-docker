@@ -1,0 +1,1 @@
+Set main laravel folder to folder www inside this folder.
